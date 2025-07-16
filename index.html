@@ -1,0 +1,286 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!-- Reemplaza la sección <style> anterior con esta para incluir estilos de la galería y thumbnails -->
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    body {
+        font-family: 'Montserrat', sans-serif;
+        background-color: #f8f1eb;
+        color: #333;
+    }
+    header {
+        background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url('https://source.unsplash.com/random/1600x900?theater');
+        background-size: cover;
+        background-position: center;
+        color: white;
+        text-align: center;
+        padding: 4em 1em;
+    }
+    header h1 {
+        font-family: 'Cinzel', serif;
+        font-size: 3em;
+        margin-bottom: 0.5em;
+    }
+    header p {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5em;
+    }
+    nav {
+        background-color: #2c2c2c;
+        padding: 1em;
+        text-align: center;
+    }
+    nav a {
+        color: white;
+        text-decoration: none;
+        margin: 0 1.5em;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+        font-size: 1.1em;
+    }
+    nav a:hover {
+        color: #d4a017;
+    }
+    .container {
+        max-width: 1000px;
+        margin: 2em auto;
+        padding: 2em;
+        background-color: white;
+        border-radius: 10px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    .section {
+        margin-bottom: 3em;
+    }
+    .section h2 {
+        font-family: 'Cinzel', serif;
+        font-size: 2em;
+        color: #2c2c2c;
+        margin-bottom: 1em;
+        text-align: center;
+    }
+    .section p {
+        line-height: 1.6;
+        font-size: 1.1em;
+    }
+    .courses {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 2em;
+        justify-content: center;
+    }
+    .course-card {
+        background-color: #f8f1eb;
+        padding: 1.5em;
+        border-radius: 8px;
+        width: 300px;
+        text-align: center;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    .course-card img {
+        width: 100%;
+        height: 150px;
+        object-fit: cover;
+        border-radius: 8px;
+        margin-bottom: 1em;
+    }
+    .course-card h3 {
+        font-family: 'Playfair Display', serif;
+        font-size: 1.5em;
+        color: #2c2c2c;
+    }
+    .gallery {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 1em;
+        justify-content: center;
+    }
+    .gallery img {
+        width: 300px;
+        height: 200px;
+        object-fit: cover;
+        border-radius: 8px;
+        transition: transform 0.3s ease;
+    }
+    .gallery img:hover {
+        transform: scale(1.05);
+        cursor: pointer;
+    }
+    .contact-form {
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    .contact-form label {
+        display: block;
+        margin-bottom: 0.5em;
+        font-weight: 600;
+    }
+    .contact-form input, .contact-form textarea {
+        width: 100%;
+        padding: 0.8em;
+        margin-bottom: 1em;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        font-family: 'Montserrat', sans-serif;
+    }
+    .contact-form button {
+        background-color: #d4a017;
+        color: white;
+        padding: 1em 2em;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-family: 'Montserrat', sans-serif;
+        font-weight: 600;
+    }
+    .contact-form button:hover {
+        background-color: #b58900;
+    }
+    footer {
+        background-color: #2c2c2c;
+        color: white;
+        text-align: center;
+        padding: 1.5em;
+        font-family: 'Montserrat', sans-serif;
+    }
+    @media (max-width: 768px) {
+        header h1 {
+            font-size: 2em;
+        }
+        header p {
+            font-size: 1.2em;
+        }
+        .course-card {
+            width: 100%;
+        }
+        .gallery img {
+            width: 100%;
+            height: auto;
+        }
+    }
+</style>
+
+<!-- Reemplaza la sección <body> con esta para incluir las imágenes en las tarjetas de cursos y la nueva galería -->
+<body>
+    <header>
+        <h1>Triángulo Escénico</h1>
+        <p>Escuela de Actuación - Despierta tu Talento</p>
+    </header>
+    <nav>
+        <a href="#inicio">Inicio</a>
+        <a href="#sobre-nosotros">Sobre Nosotros</a>
+        <a href="#cursos">Cursos</a>
+        <a href="#galeria">Galería</a>
+        <a href="#contacto">Contacto</a>
+    </nav>
+    <div class="container">
+        <div class="section" id="inicio">
+            <h2>Bienvenidos a Triángulo Escénico</h2>
+            <p>En Triángulo Escénico, ofrecemos formación actoral de primer nivel para todas las edades y niveles de experiencia. Nuestra misión es inspirar y desarrollar el talento artístico a través de técnicas modernas y un ambiente creativo.</p>
+        </div>
+        <div class="section" id="sobre-nosotros">
+            <h2>Sobre Nosotros</h2>
+            <p>Somos una escuela dedicada a la formación de actores apasionados. Contamos con profesores experimentados y un enfoque práctico que combina teoría, improvisación y presentaciones en vivo. ¡Únete a nuestra comunidad teatral!</p>
+        </div>
+        <div class="section" id="cursos">
+            <h2>Nuestros Cursos</h2>
+            <div class="courses">
+                <div class="course-card">
+                    <img src="https://source.unsplash.com/random/300x200?acting" alt="Actuación para Principiantes">
+                    <h3>Actuación para Principiantes</h3>
+                    <p>Un curso introductorio para explorar las bases de la actuación, incluyendo expresión corporal, voz y emociones.</p>
+                </div>
+                <div class="course-card">
+                    <img src="https://source.unsplash.com/random/300x200?theater" alt="Teatro Avanzado">
+                    <h3>Teatro Avanzado</h3>
+                    <p>Perfecciona tus habilidades con técnicas avanzadas, improvisación y preparación para audiciones.</p>
+                </div>
+                <div class="course-card">
+                    <img src="https://source.unsplash.com/random/300x200?children-acting" alt="Actuación para Niños">
+                    <h3>Actuación para Niños</h3>
+                    <p>Clases dinámicas para niños, enfocadas en desarrollar confianza y creatividad a través del teatro.</p>
+                </div>
+            </div>
+        </div>
+        <div class="section" id="galeria">
+            <h2>Galería</h2>
+            <div class="gallery">
+                <img src="https://source.unsplash.com/random/300x200?stage" alt="Escena de teatro">
+                <img src="https://source.unsplash.com/random/300x200?acting-class" alt="Clase de actuación">
+                <img src="https://source.unsplash.com/random/300x200?performance" alt="Presentación">
+                <img src="https://source.unsplash.com/random/300x200?drama" alt="Ensayo teatral">
+            </div>
+        </div>
+        <div class="section" id="contacto">
+            <h2>Contáctanos</h2>
+            <div class="contact-form">
+                <label for="name">Nombre:</label>
+                <input type="text" id="name" placeholder="Tu nombre" required>
+                <label for="email">Correo Electrónico:</label>
+                <input type="email" id="email" placeholder="Tu correo" required>
+                <label for="message">Mensaje:</label>
+                <textarea id="message" rows="5" placeholder="Escribe tu consulta" required></textarea>
+                <button onclick="enviarFormulario()">Enviar</button>
+            </div>
+        </div>
+    </div>
+    <footer>
+        <p>© 2025 Triángulo Escénico. Todos los derechos reservados.</p>
+    </footer>
+    <script>
+        function enviarFormulario() {
+            const name = document.getElementById('name').value;
+            const email = document.getElementById('email').value;
+            const message = document.getElementById('message').value;
+            if (name && email && message) {
+                alert('¡Formulario enviado! Gracias por contactarnos, ' + name + '.');
+                document.getElementById('name').value = '';
+                document.getElementById('email').value = '';
+                document.getElementById('message').value = '';
+            } else {
+                alert('Por favor, completa todos los campos.');
+            }
+        }
+    </script>
+</body>
